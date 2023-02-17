@@ -7,8 +7,30 @@ class TutorController {
     public function obtenerTutor()
     {
         $instanceTutor = new Tutor;
-        $tutor = $instanceTutor->all();
+        $tutor = $instanceTutor->allJoin('materia');
         return $tutor;
+    }
+    public function buscador()
+    {
+        $instanceTutor = new Tutor;
+        switch (isset($_REQUEST)) {
+            case isset($_POST['busqueda']):
+                $column = $_POST['columna'];
+                $valor = $_POST['dato'];
+                if($column == '*'){
+                    echo $this->redirectVista("main");
+                }
+                $buscar = $instanceTutor->obtenerBusqueda($column, $valor);
+                if(empty($buscar)){
+                    echo "No se encontro ningun dato con la palabra: {$valor}";
+                }else{
+                    return $buscar;
+                }
+                break;
+            default:
+                # code...
+                break;
+        }
     }
     public function consulta()
     {
@@ -29,18 +51,18 @@ class TutorController {
                     break;
 
                 case isset($_GET['edit']):
-                    // OBTENER EL ID Y BUSCAR EL DATO
                     $id = $_GET['edit'];
-                    // DATOS DUPLICADOS id tutor = id materia (Revisar funcion)
                     $data = $instanceTutor->findJoin($id, 'materia');
                     return $data;
                     break;
 
                 case isset($_POST['guardarEdit']):
                     // GUARDO LOS DATOS ACTUALIZADOS
-                    $id = $_POST['id_tutor'];
+                    $id = $_POST['id'];
                     $instanceTutor->update($id,[
                         'materia_id' => $_POST['materia'],
+                        'turno_id' => $_POST['turno'],
+                        'aula_id' => $_POST['aula'],
                         'nombre' => $_POST['nombre'],
                         'apellido' => $_POST['apellido']
                     ]);
@@ -48,11 +70,16 @@ class TutorController {
                     break;
 
                 case isset($_POST['guardarTutor']):
-                    $instanceTutor->create([
-                        'nombre' => $_POST['nombre'],
-                        'apellido' => $_POST['apellido'],
-                        'materia_id' => $_POST['materia']
-                    ]);
+                    $materias = $_POST['materia'];
+                    foreach($materias as $materia){
+                        $instanceTutor->create([
+                            'materia_id' => $materia,
+                            'turno_id' => $_POST['turno'],
+                            'aula_id' => $_POST['aula'],
+                            'nombre' => $_POST['nombre'],
+                            'apellido' => $_POST['apellido']
+                        ]);
+                    }
                     echo $this->redirectVista("main");
                     break;
 
@@ -66,16 +93,6 @@ class TutorController {
             default:
                 # code...
                 break;
-        }
-    }
-    public function buscadorDato()
-    {
-        $instanceTutor = new Tutor;
-        if(isset($_POST['enviarBusqueda'])){
-            $column = $_POST['buscarDato'];
-            $valor = $_POST['dato'];
-            $buscar = $instanceTutor->where($column ,$valor)->get();
-            return ($buscar);
         }
     }
 }

@@ -27,6 +27,7 @@
                             <div class="accordion-body d-flex flex-column">
                                 <a class="btn btn-primary" href="../view/Materia/main.php">Materia</a>
                                 <a class="btn btn-primary mt-3" href="../view/Tutor/main.php">Tutor</a>
+                                <a class="btn btn-primary mt-3" href="../view/Aula/main.php">Aula</a>
                             </div>
                         </div>
                     </div>

@@ -1,7 +1,6 @@
 <?php
-
 namespace App\Models;
-use mysqli;
+
 use PDO;
 use PDOException;
 use PDORow;
@@ -59,6 +58,27 @@ class Model
         $sql = "SELECT * FROM {$this->table}";
         return $this->query($sql)->get();
     }
+    public function allJoin($table2)
+    {
+        // CONSULTA INNER COMPLETAR LA CONSULTA PARA AUTOMATIZAR LOS JOIN 
+        $sql = "SELECT tutor.id, 
+        tutor.nombre, 
+        tutor.apellido, 
+        tutor.estado, 
+        tutor.materia_id, 
+        materia.materia, 
+        materia.estado as estado_materia, 
+        aula.id as id_aula, 
+        aula.detalle_aula, 
+        aula.estado as estado_aula, 
+        turno.id as id_turno, 
+        turno.nombre_turno
+        FROM {$this->table} 
+        INNER JOIN {$table2} on tutor.materia_id = materia.id 
+        INNER JOIN aula on tutor.aula_id = aula.id 
+        INNER JOIN turno on tutor.turno_id = turno.id";
+        return $this->query($sql)->get();
+    }
     // BUSCA UN DATO ESPECIFICO
     public function find($id)
     {
@@ -68,10 +88,35 @@ class Model
     // REVISAR FUNCION 
     public function findJoin($id, $table2)
     {
-        $sql = "SELECT *, tutor.id AS id_tutor FROM {$this->table} INNER JOIN {$table2} ON {$this->table}.materia_id = {$table2}.id";
+        $sql = "SELECT tutor.id, 
+        tutor.nombre, 
+        tutor.apellido, 
+        tutor.estado, 
+        tutor.materia_id, 
+        materia.materia, 
+        materia.estado as estado_materia, 
+        aula.id as id_aula, 
+        aula.detalle_aula, 
+        aula.estado as estado_aula, 
+        turno.id as id_turno, 
+        turno.nombre_turno
+        FROM {$this->table} 
+        INNER JOIN {$table2} on tutor.materia_id = materia.id 
+        INNER JOIN aula on tutor.aula_id = aula.id 
+        INNER JOIN turno on tutor.turno_id = turno.id WHERE {$this->table}.id = '{$id}'";
         return $this->query($sql)->first();
     }
     public function where($column, $operator, $value = null)
+    {
+    if($value == null){
+        $value = $operator;
+        $operator = '=';
+    }
+        $sql = "SELECT * FROM {$this->table} WHERE {$column} {$operator} '{$value}'";
+        $this->query($sql);
+        return $this;
+    }
+    public function whereJoin($column, $operator, $value = null)
     {
     if($value == null){
         $value = $operator;
@@ -132,6 +177,10 @@ class Model
         $sql = "UPDATE {$this->table} SET estado = 1 WHERE id = {$id}";
         $this->query($sql);
     }
-}
 
-?>
+    // CONSULTAS PERSONALES
+public function obtenerBusqueda($column, $value){
+    $sql = "SELECT * FROM gestion_materia WHERE {$column} = '{$value}'";
+    return $this->query($sql)->get(); 
+    }
+}
